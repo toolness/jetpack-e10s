@@ -69,8 +69,15 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
 
   process.registerReceiver(
     "core:exception",
-    function(name, obj) {
-      console.log("exception in child", JSON.stringify(obj));
+    function(name, exception) {
+      var e = {
+        toString: function toString() {
+          return "Error: " + e.message;
+        },
+        __proto__: exception
+      };
+      console.log("An exception occurred in the child Jetpack process.");
+      console.exception(e);
     });
 
   process.registerReceiver(

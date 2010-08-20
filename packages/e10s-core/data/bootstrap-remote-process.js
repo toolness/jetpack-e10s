@@ -43,14 +43,9 @@ function require(name) {
          module[name] = global[name];
        });
 
-  try {
-    evalInSandbox(module, '//@line 1 "' + response.script.filename + 
-                  '"\n' + response.script.contents);
-  } catch (e) {
-    console.log("error while loading module: " + name + " " + e +
-                " " + e.stack);
-    throw e;
-  }
+  evalInSandbox(module, '//@line 1 "' + response.script.filename + 
+                '"\n' + response.script.contents);
+
   return module.exports;
 };
 
