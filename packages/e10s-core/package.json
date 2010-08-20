@@ -1,0 +1,4 @@
+{
+  "loader": "lib/cuddlefish.js",
+  "dependencies": ["jetpack-core"]
+}
