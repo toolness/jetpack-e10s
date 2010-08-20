@@ -83,7 +83,6 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
     "require",
     function(name, path) {
       // TODO: Add support for relative paths, e.g. ./foo.
-      var module;
       var moduleName = path;
       var parentFS = require("cuddlefish").parentLoader.fs;
       var moduleURL = parentFS.resolveModule(null, moduleName);
@@ -101,7 +100,7 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
             // e10s adapter found!
             var adapterModuleFilename = url.toFilename(adapterModuleURL);
             try {
-              require(adapterModule);
+              require(adapterModuleName).register(process);
             } catch (e) {
               console.exception(e);
               return {code: "error"};
