@@ -23,7 +23,6 @@ function JetpackProcess() {
   };
 
   this.eval = function(urlObj) {
-    // TODO: Add @line comment at beginning.
     var filename = url.toFilename(urlObj);
     // The try ... catch is a workaround for bug 589308.
     process.evalScript('//@line 1 "' + filename + '"\n' +
