@@ -49,7 +49,11 @@ function require(name) {
   return module.exports;
 };
 
-var main = require("main");
+registerReceiver(
+  "startMain",
+  function(name, mainName) {
+    var main = require(mainName);
 
-if ('main' in main)
-  main.main();
+    if ('main' in main)
+      main.main();
+  });

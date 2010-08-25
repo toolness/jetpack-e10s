@@ -31,7 +31,7 @@ function JetpackProcess() {
   };
 }
 
-exports.startMainRemotely = function startMainRemotely(options, callbacks) {
+exports.init = function init(loader, packaging) {
   var packages = {};
 
   packaging.options.manifest.forEach(
@@ -47,6 +47,22 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
       packages[packageName][moduleName] = info;
     });
 
+  exports.getModuleInfo = function getModuleInfo(base, path) {
+    var parentFS = loader.fs;
+    var moduleURL = parentFS.resolveModule(base, path);
+    if (moduleURL) {
+      var info = url.URL(moduleURL);
+      var pkgName = packaging.options.resourcePackages[info.host];
+      var manifest = packages[pkgName][path];
+      return {url: moduleURL,
+              filename: url.toFilename(moduleURL),
+              needsChrome: manifest.needsChrome};
+    }
+    return null;
+  };
+};
+
+exports.startMainRemotely = function startMainRemotely(options, callbacks) {
   var process = new JetpackProcess();
 
   // Whenever our add-on is disabled or uninstalled, we want to
@@ -83,22 +99,17 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
     "require",
     function(name, path) {
       // TODO: Add support for relative paths, e.g. ./foo.
+      var moduleInfo = exports.getModuleInfo(null, path);
       var moduleName = path;
-      var parentFS = require("cuddlefish").parentLoader.fs;
-      var moduleURL = parentFS.resolveModule(null, moduleName);
 
-      if (moduleURL) {
-        var info = url.URL(moduleURL);
-        var pkgName = packaging.options.resourcePackages[info.host];
-
-        if (packages[pkgName][moduleName].needsChrome) {
+      if (moduleInfo) {
+        if (moduleInfo.needsChrome) {
           var adapterModuleName = moduleName + "-e10s-adapter";
-          var adapterModuleURL = parentFS.resolveModule(null,
+          var adapterModuleInfo = exports.getModuleInfo(null,
                                                         adapterModuleName);
 
-          if (adapterModuleURL) {
+          if (adapterModuleInfo) {
             // e10s adapter found!
-            var adapterModuleFilename = url.toFilename(adapterModuleURL);
             try {
               require(adapterModuleName).register(process);
             } catch (e) {
@@ -109,8 +120,8 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
               code: "ok",
               needsMessaging: true,
               script: {
-                filename: adapterModuleFilename,
-                contents: file.read(adapterModuleFilename)
+                filename: adapterModuleInfo.filename,
+                contents: file.read(adapterModuleInfo.filename)
               }
             };
           } else {
@@ -118,13 +129,12 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
             return {code: "access-denied"};
           }
         } else {
-          var moduleFilename = url.toFilename(moduleURL);
           return {
             code: "ok",
             needsMessaging: false,
             script: {
-              filename: moduleFilename,
-              contents: file.read(moduleFilename)
+              filename: moduleInfo.filename,
+              contents: file.read(moduleInfo.filename)
             }
           };
         }
@@ -134,4 +144,5 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
     });
 
   process.eval(require("self").data.url("bootstrap-remote-process.js"));
+  process.sendMessage("startMain", options.main);
 };

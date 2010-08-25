@@ -133,14 +133,17 @@
      loader.unload = unloadLoader;
 
      if ('packaging' in globals) {
-       var mainModule = globals.packaging.options.main;
-       var mainPath = loader.fs.resolveModule(null, mainModule);
-       modules[mainPath] = {
-         main: function main(options, callbacks) {
-           var e10s = loader.require("e10s");
-           e10s.startMainRemotely(options, callbacks);
-         }
-       };
+       var e10s = loader.require("e10s");
+       e10s.init(loader, globals.packaging);
+
+       var mainInfo = e10s.getModuleInfo(null, globals.packaging.options.main);
+       if (!mainInfo.needsChrome) {
+         modules[mainInfo.url] = {
+           main: function main(options, callbacks) {
+             e10s.startMainRemotely(options, callbacks);
+           }
+         };
+       }
      }
 
      return loader;
