@@ -31,36 +31,12 @@ function JetpackProcess() {
   };
 }
 
-exports.init = function init(loader, packaging) {
-  var packages = {};
-
-  packaging.options.manifest.forEach(
-    function(entry) {
-      var packageName = entry[0];
-      var moduleName = entry[1];
-      var info = {        
-        dependencies: entry[2],
-        needsChrome: entry[3]
-      };
-      if (!(packageName in packages))
-        packages[packageName] = {};
-      packages[packageName][moduleName] = info;
-    });
-
-  exports.getModuleInfo = function getModuleInfo(base, path) {
-    var parentFS = loader.fs;
-    var moduleURL = parentFS.resolveModule(base, path);
-    if (moduleURL) {
-      var info = url.URL(moduleURL);
-      var pkgName = packaging.options.resourcePackages[info.host];
-      var manifest = packages[pkgName][path];
-      return {url: moduleURL,
-              filename: url.toFilename(moduleURL),
-              needsChrome: manifest.needsChrome};
-    }
-    return null;
+function makeScriptFrom(moduleURL) {
+  return {
+    filename: moduleURL,
+    contents: file.read(url.toFilename(moduleURL))
   };
-};
+}
 
 exports.startMainRemotely = function startMainRemotely(options, callbacks) {
   var process = new JetpackProcess();
@@ -99,14 +75,19 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
     "require",
     function(name, path) {
       // TODO: Add support for relative paths, e.g. ./foo.
-      var moduleInfo = exports.getModuleInfo(null, path);
+      var parentFS = packaging.harnessService.loader.fs;
+      var moduleURL = parentFS.resolveModule(null, path);
+      var moduleInfo = moduleURL ? packaging.getModuleInfo(moduleURL) : null;
       var moduleName = path;
 
       if (moduleInfo) {
         if (moduleInfo.needsChrome) {
           var adapterModuleName = moduleName + "-e10s-adapter";
-          var adapterModuleInfo = exports.getModuleInfo(null,
+          var adapterModuleURL = parentFS.resolveModule(null,
                                                         adapterModuleName);
+          var adapterModuleInfo = null;
+          if (adapterModuleURL)
+            adapterModuleInfo = packaging.getModuleInfo(adapterModuleURL);
 
           if (adapterModuleInfo) {
             // e10s adapter found!
@@ -119,10 +100,7 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
             return {
               code: "ok",
               needsMessaging: true,
-              script: {
-                filename: adapterModuleInfo.filename,
-                contents: file.read(adapterModuleInfo.filename)
-              }
+              script: makeScriptFrom(adapterModuleURL)
             };
           } else {
             // No adapter exists!
@@ -132,10 +110,7 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
           return {
             code: "ok",
             needsMessaging: false,
-            script: {
-              filename: moduleInfo.filename,
-              contents: file.read(moduleInfo.filename)
-            }
+            script: makeScriptFrom(moduleURL)
           };
         }
       } else {

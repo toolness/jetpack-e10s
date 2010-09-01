@@ -133,13 +133,13 @@
      loader.unload = unloadLoader;
 
      if ('packaging' in globals) {
-       var e10s = loader.require("e10s");
-       e10s.init(loader, globals.packaging);
-
-       var mainInfo = e10s.getModuleInfo(null, globals.packaging.options.main);
+       var mainURL = loader.fs.resolveModule(null,
+                                             globals.packaging.options.main);
+       var mainInfo = globals.packaging.getModuleInfo(mainURL);
        if (!mainInfo.needsChrome) {
-         modules[mainInfo.url] = {
+         modules[mainURL] = {
            main: function main(options, callbacks) {
+             var e10s = loader.require("e10s");
              e10s.startMainRemotely(options, callbacks);
            }
          };
