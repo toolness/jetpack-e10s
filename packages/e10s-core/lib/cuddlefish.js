@@ -79,19 +79,53 @@
      this.require("unload").send(reason);
    }
 
-   var cuddlefishSandboxFactory = {
-     createSandbox: function(options) {
-       var filename = options.filename ? options.filename : null;
-       var sandbox = this.__proto__.createSandbox(options);
-       sandbox.defineProperty("__url__", filename);
-       return sandbox;
-     },
-     __proto__: new securableModule.SandboxFactory("system")
-   };
+   function maybeLoadMainInJetpackProcess(delegate, packaging) {
+     return function getModuleExports(basePath, module) {     
+       if (module == packaging.options.main) {
+         var mainURL = this.fs.resolveModule(basePath, module);
+         var mainInfo = packaging.getModuleInfo(mainURL);
+         if (!mainInfo.needsChrome) {
+           var loader = this;
+           return {
+             main: function main(options, callbacks) {
+               var e10s = loader.require("e10s");
+               e10s.startMainRemotely(options, callbacks);
+             }
+           };
+         } else
+           return null;
+       }
+       return (delegate ? delegate.call(this, basePath, module) : null);
+     };
+   }
 
-   function CuddlefishModule(loader) {
-     this.parentLoader = loader;
-     this.__proto__ = exports;
+   function makeGetModuleExports(delegate) {
+     return function getModuleExports(basePath, module) {
+       switch (module) {
+       case "chrome":
+         var chrome = { Cc: Components.classes,
+                        Ci: Components.interfaces,
+                        Cu: Components.utils,
+                        Cr: Components.results,
+                        Cm: Components.manager,
+                        components: Components };
+         return chrome;
+       case "parent-loader":
+         return this;
+       default:
+         return (delegate ? delegate.call(this, basePath, module) : null);
+       }
+     };
+   }
+
+   function modifyModuleSandbox(sandbox, options) {
+     let ES5 = this.require('es5');
+     if ('init' in ES5) {
+       let { Object, Array, Function } = sandbox.globalScope;
+       ES5.init(Object, Array, Function);
+     }
+     var filename = options.filename ? options.filename : null;
+     sandbox.defineProperty("__url__", filename);
    }
 
    var Loader = exports.Loader = function Loader(options) {
@@ -106,18 +140,24 @@
      if (options.memory)
        globals.memory = options.memory;
 
-     var modules = options.modules || {};
+     if ('modules' in options)
+       throw new Error('options.modules is no longer supported');
+
+     var getModuleExports = makeGetModuleExports(options.getModuleExports);
+
+     if ('packaging' in globals)
+       getModuleExports = maybeLoadMainInJetpackProcess(getModuleExports,
+                                                        globals.packaging);
 
      var loaderOptions = {rootPath: options.rootPath,
                           rootPaths: options.rootPaths,
                           fs: options.fs,
-                          sandboxFactory: cuddlefishSandboxFactory,
+                          defaultPrincipal: "system",
                           globals: globals,
-                          modules: modules};
+                          modifyModuleSandbox: modifyModuleSandbox,
+                          getModuleExports: getModuleExports};
 
      var loader = new securableModule.Loader(loaderOptions);
-     var path = loader.fs.resolveModule(null, "cuddlefish");
-     modules[path] = new CuddlefishModule(loader);
 
      if (!globals.console) {
        var console = loader.require("plain-text-console");
@@ -126,25 +166,9 @@
      if (!globals.memory)
        globals.memory = loader.require("memory");
 
-     modules['es5'] = loader.require('es5');
-
      loader.console = globals.console;
      loader.memory = globals.memory;
      loader.unload = unloadLoader;
-
-     if ('packaging' in globals) {
-       var mainURL = loader.fs.resolveModule(null,
-                                             globals.packaging.options.main);
-       var mainInfo = globals.packaging.getModuleInfo(mainURL);
-       if (!mainInfo.needsChrome) {
-         modules[mainURL] = {
-           main: function main(options, callbacks) {
-             var e10s = loader.require("e10s");
-             e10s.startMainRemotely(options, callbacks);
-           }
-         };
-       }
-     }
 
      return loader;
    };
