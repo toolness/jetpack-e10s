@@ -38,7 +38,7 @@ function makeScriptFrom(moduleURL) {
   };
 }
 
-exports.startMainRemotely = function startMainRemotely(options, callbacks) {
+exports.createProcess = function createProcess() {
   var process = new JetpackProcess();
 
   // Whenever our add-on is disabled or uninstalled, we want to
@@ -119,5 +119,6 @@ exports.startMainRemotely = function startMainRemotely(options, callbacks) {
     });
 
   process.eval(require("self").data.url("bootstrap-remote-process.js"));
-  process.sendMessage("startMain", options.main);
+
+  return process;
 };

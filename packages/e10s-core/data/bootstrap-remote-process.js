@@ -8,6 +8,7 @@ var console = {
     sendMessage('console:log', "" + msg);
   }
 };
+console.info = console.log;
 
 function require(name) {
   var response = callMessage("require", name)[0];
@@ -48,6 +49,44 @@ function require(name) {
 
   return module.exports;
 };
+
+registerReceiver(
+  "runTest",
+  function(name, test) {
+    var runner = {
+      pass: function pass(msg) {
+        sendMessage("testPass", test, msg);
+      },
+      fail: function fail(msg) {
+        sendMessage("testFail", test, msg);
+      }
+    };
+    test.testHandle.testFunction(runner);
+    sendMessage("testDone", test);
+  });
+
+registerReceiver(
+  "findTests",
+  function(name, suites) {
+    function makeTest(suite, name, test) {
+      return function runTest(runner) {
+        console.info("executing '" + suite + "." + name + "'");
+        test(runner);
+      };
+    }
+
+    var tests = [];
+
+    suites.forEach(function(suite) {
+      var module = require(suite);
+      for (testName in module) {
+        var handle = createHandle();
+        handle.testFunction = makeTest(suite, testName, module[testName]);
+        tests.push({testHandle: handle, name: suite + "." + name});
+      }
+    });
+    sendMessage("testsFound", tests);
+  });
 
 registerReceiver(
   "startMain",

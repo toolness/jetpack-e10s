@@ -88,8 +88,9 @@
            var loader = this;
            return {
              main: function main(options, callbacks) {
-               var e10s = loader.require("e10s");
-               e10s.startMainRemotely(options, callbacks);
+               var e10s = loader.require("e10s");  
+               var process = e10s.createProcess();
+               process.sendMessage("startMain", options.main);
              }
            };
          } else
