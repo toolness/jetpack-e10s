@@ -70,7 +70,7 @@ registerReceiver(
   function(name, suites) {
     function makeTest(suite, name, test) {
       return function runTest(runner) {
-        console.info("executing '" + suite + "." + name + "'");
+        console.info("executing '" + suite + "." + name + "' remotely");
         test(runner);
       };
     }
