@@ -110,7 +110,7 @@ TestFinder.prototype = {
           tests.push({
             testFunction: function(runner) {
               remoteTest.testHandle.runner = runner;
-              runner.waitUntilDone(5000);
+              runner.waitUntilDone();
               process.sendMessage("runTest", remoteTest);
             },
             name: remoteTest.name
