@@ -17,6 +17,10 @@ function JetpackProcess() {
   this.sendMessage = function() {
     return process.sendMessage.apply(this, arguments);
   };
+  
+  this.createHandle = function() {
+    return process.createHandle();
+  };
 
   this.destroy = function() {
     process.destroy();

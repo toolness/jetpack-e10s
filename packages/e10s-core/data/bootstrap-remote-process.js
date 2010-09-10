@@ -51,48 +51,13 @@ function require(name) {
 };
 
 registerReceiver(
-  "runTest",
-  function(name, test) {
-    var runner = {
-      pass: function pass(msg) {
-        sendMessage("testPass", test, msg);
-      },
-      fail: function fail(msg) {
-        sendMessage("testFail", test, msg);
-      }
-    };
-    test.testHandle.testFunction(runner);
-    sendMessage("testDone", test);
-  });
-
-registerReceiver(
-  "findTests",
-  function(name, suites) {
-    function makeTest(suite, name, test) {
-      return function runTest(runner) {
-        console.info("executing '" + suite + "." + name + "' remotely");
-        test(runner);
-      };
-    }
-
-    var tests = [];
-
-    suites.forEach(function(suite) {
-      var module = require(suite);
-      for (testName in module) {
-        var handle = createHandle();
-        handle.testFunction = makeTest(suite, testName, module[testName]);
-        tests.push({testHandle: handle, name: suite + "." + name});
-      }
-    });
-    sendMessage("testsFound", tests);
-  });
-
-registerReceiver(
   "startMain",
-  function(name, mainName) {
+  function(name, mainName, options, callbacks) {
     var main = require(mainName);
 
+    // TODO: Callbacks will just be handles, we need to actually turn
+    // them into functions.
+
     if ('main' in main)
-      main.main();
+      main.main(options, callbacks);
   });

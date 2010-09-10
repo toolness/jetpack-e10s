@@ -96,29 +96,14 @@ TestFinder.prototype = {
 
     if (remoteSuites.length > 0) {
       var process = require("e10s").createProcess();
-      process.registerReceiver("testDone", function(name, remoteTest) {
-        remoteTest.testHandle.runner.done();
+      var finderHandle = process.createHandle();
+      finderHandle.onTestsFound = function(testsFound) {
+        cb(tests.concat(testsFound));
+      };
+      process.sendMessage("startMain", "find-tests", {
+        suites: remoteSuites,
+        finderHandle: finderHandle
       });
-      process.registerReceiver("testPass", function(name, remoteTest, msg) {
-        remoteTest.testHandle.runner.pass(msg);
-      });
-      process.registerReceiver("testFail", function(name, remoteTest, msg) {
-        remoteTest.testHandle.runner.fail(msg);
-      });
-      process.registerReceiver("testsFound", function(name, remoteTests) {
-        remoteTests.forEach(function(remoteTest) {
-          tests.push({
-            testFunction: function(runner) {
-              remoteTest.testHandle.runner = runner;
-              runner.waitUntilDone();
-              process.sendMessage("runTest", remoteTest);
-            },
-            name: remoteTest.name
-          });
-        });
-        cb(tests);
-      });
-      process.sendMessage("findTests", remoteSuites);
     } else
       cb(tests);
   }
