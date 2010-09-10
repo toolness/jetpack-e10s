@@ -84,32 +84,35 @@ exports.createProcess = function createProcess() {
       var moduleInfo = moduleURL ? packaging.getModuleInfo(moduleURL) : null;
       var moduleName = path;
 
+      function maybeImportAdapterModule() {
+        var adapterModuleName = moduleName + "-e10s-adapter";
+        var adapterModuleURL = parentFS.resolveModule(null,
+                                                      adapterModuleName);
+        var adapterModuleInfo = null;
+        if (adapterModuleURL)
+          adapterModuleInfo = packaging.getModuleInfo(adapterModuleURL);
+
+        if (adapterModuleInfo) {
+          // e10s adapter found!
+          try {
+            require(adapterModuleName).register(process);
+          } catch (e) {
+            console.exception(e);
+            return {code: "error"};
+          }
+          return {
+            code: "ok",
+            needsMessaging: true,
+            script: makeScriptFrom(adapterModuleURL)
+          };
+        }
+        
+        return null;
+      }
+
       if (moduleInfo) {
         if (moduleInfo.needsChrome) {
-          var adapterModuleName = moduleName + "-e10s-adapter";
-          var adapterModuleURL = parentFS.resolveModule(null,
-                                                        adapterModuleName);
-          var adapterModuleInfo = null;
-          if (adapterModuleURL)
-            adapterModuleInfo = packaging.getModuleInfo(adapterModuleURL);
-
-          if (adapterModuleInfo) {
-            // e10s adapter found!
-            try {
-              require(adapterModuleName).register(process);
-            } catch (e) {
-              console.exception(e);
-              return {code: "error"};
-            }
-            return {
-              code: "ok",
-              needsMessaging: true,
-              script: makeScriptFrom(adapterModuleURL)
-            };
-          } else {
-            // No adapter exists!
-            return {code: "access-denied"};
-          }
+          return maybeImportAdapterModule() || {code: "access-denied"};
         } else {
           return {
             code: "ok",
@@ -118,7 +121,7 @@ exports.createProcess = function createProcess() {
           };
         }
       } else {
-        return {code: "not-found"};
+        return maybeImportAdapterModule() || {code: "not-found"};
       }
     });
 
