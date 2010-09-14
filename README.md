@@ -2,6 +2,15 @@
 
 This is a Jetpack package that allows Firefox addons to be created that execute in a separate process from Firefox itself.
 
+This package contains examples and the following sub-packages:
+
+  * <code>[e10s-core][]</code> makes the Jetpack platform multi-process-aware. Specifically, it replaces parts of Jetpack's module loader to allow non-chrome-privileged modules to be loaded in a separate process. Citing this package as a dependency in an addon's `package.json` will cause it to be loaded and executed with the semantics described in the rest of this document.
+
+  * <code>[e10s-test-runner][]</code> provides a multi-process-aware test runner that executes all non-chrome-privileged test modules in a separate process.
+
+  [e10s-core]: http://github.com/toolness/jetpack-e10s/tree/master/packages/e10s-core/
+  [e10s-test-runner]: http://github.com/toolness/jetpack-e10s/tree/master/packages/e10s-test-runner/
+
 ### Prerequisites ###
 
   * The latest [Firefox 4 Beta][].
@@ -21,6 +30,8 @@ This is a Jetpack package that allows Firefox addons to be created that execute 
 
         cfx test --test-runner-pkg=e10s-test-runner
 
+   The extra arguments tell `cfx` to use the multi-process-aware test runner.
+
 3. Run the example itself:
 
         cfx run
@@ -34,7 +45,7 @@ This is a Jetpack package that allows Firefox addons to be created that execute 
 
 ### The Big Picture ###
 
-![Multi-Process Architecture](http://github.com/toolness/jetpack-e10s/raw/master/diagrams/xhr.png)
+![Multi-Process Architecture](http://github.com/toolness/jetpack-e10s/raw/master/diagrams/twitter-widget.png)
 
 The above diagram is a simplified depiction of what happens when the example [twitter-widget][] addon is loaded.
 
@@ -47,9 +58,11 @@ The Firefox Process then notices that the `widget` module requires chrome privil
 This causes <code>[widget-e10s-adapter.js][]</code> to be found and imported as the `widget-e10s-adapter` module in the Firefox Process. The *exact same code* is also returned to the Addon Process for evaluation as the `widget` module in its world, and its exports are returned by `require()`. In other words, different sides of the message-passing boundary between the two processes are contained in the same adapter file, which is typically of the following form:
 
     if (this.sendMessage) {
-	  /* Set-up Addon Process message-passing infrastructure
+	  /* We're being evaluated in the Addon Process. Set up message-passing
+	   * infrastructure to communicate with the Firefox Process
 	   * and export an API. */
     } else {
+	  /* We're being evaluated in the Firefox Process. */
 	  exports.register = function register(process) {
 		/* Set-up Firefox Process message-passing infrastructure
 		 * to communicate with the given Addon Process. */
