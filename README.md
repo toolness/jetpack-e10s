@@ -10,6 +10,23 @@ This is a Jetpack package that allows Firefox addons to be created that execute 
   [Firefox 4 Beta]: http://www.mozilla.com/en-US/firefox/beta/
   [Jetpack SDK]: http://github.com/mozillalabs/jetpack-sdk
 
+### Running An Example ###
+
+1. Activate your SDK and clone this git repository in the `packages` subdirectory of your SDK and enter the `twitter-widget` example:
+
+    `git clone git://github.com/toolness/jetpack-e10s.git`
+
+    `cd jetpack-e10s/examples/twitter-widget`
+
+2. Run the example addon using `cfx run`.
+
+3. Once Firefox starts up, you should see a widget at the bottom of the
+   browser labeled "Click me!" (it may be truncated due to size constraints).
+   Do what it says.
+
+4. The widget label should change to "..." for a moment and then change
+   to the Twitter status of [toolness](http://twitter.com/toolness).
+
 ### Overview ###
 
 ![Multi-Process Architecture](http://github.com/toolness/jetpack-e10s/raw/master/diagrams/xhr.png)
@@ -22,7 +39,7 @@ When `main.js` calls `require("widget")`, the Addon Process sends a message to t
 
 The Firefox Process then notices that the `widget` module requires chrome privileges and therefore won't work properly if sent to the Addon Process for evaluation. So it looks for an *e10s adapter* for the module by appending `-e10s-adapter` to the module's name and searching for it.
 
-This causes <code>[widget-e10s-adapter.js][]</code> to be found and imported as the `widget-e10s-adapter` module in the Firefox Process. The *exact same code* is also sent to the Addon Process for evaluation as the `widget` module in its world, and its `exports` are returned by `require()`. In other words, different sides of the message-passing boundary between the two processes are contained in the same adapter file, which is typically of the following form:
+This causes <code>[widget-e10s-adapter.js][]</code> to be found and imported as the `widget-e10s-adapter` module in the Firefox Process. The *exact same code* is also returned to the Addon Process for evaluation as the `widget` module in its world, and its exports are returned by `require()`. In other words, different sides of the message-passing boundary between the two processes are contained in the same adapter file, which is typically of the following form:
 
     if (this.sendMessage) {
 	  /* Set-up Addon Process message-passing infrastructure
