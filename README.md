@@ -9,8 +9,8 @@ that execute in a separate process from Firefox itself.
 
 ### Prerequisites ###
 
-  * The latest [Firefox nightly][].
+  * The latest [Firefox 4 Beta][].
   * The latest [Jetpack SDK][].
 
-  [Firefox nightly]: http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/
+  [Firefox 4 Beta]: http://www.mozilla.com/en-US/firefox/beta/
   [Jetpack SDK]: http://github.com/mozillalabs/jetpack-sdk
