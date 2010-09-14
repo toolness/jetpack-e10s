@@ -2,7 +2,7 @@
 
 This is a Jetpack package that allows Firefox addons to be created that execute in a separate process from Firefox itself.
 
-This package contains examples and the following sub-packages:
+This package contains the following sub-packages:
 
   * <code>[e10s-core][]</code> makes the Jetpack platform multi-process-aware. Specifically, it replaces parts of Jetpack's module loader to allow non-chrome-privileged modules to be loaded in a separate process. Citing this package as a dependency in an addon's `package.json` will cause it to be loaded and executed with the semantics described in the rest of this document.
 
