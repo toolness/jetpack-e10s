@@ -14,20 +14,25 @@ This is a Jetpack package that allows Firefox addons to be created that execute 
 
 1. Activate your SDK and clone this git repository in the `packages` subdirectory of your SDK and enter the `twitter-widget` example:
 
-    `git clone git://github.com/toolness/jetpack-e10s.git`
+        git clone git://github.com/toolness/jetpack-e10s.git
+        cd jetpack-e10s/examples/twitter-widget
 
-    `cd jetpack-e10s/examples/twitter-widget`
+2. Run the test suite for the example:
 
-2. Run the example addon using `cfx run`.
+        cfx test --test-runner-pkg=e10s-test-runner
 
-3. Once Firefox starts up, you should see a widget at the bottom of the
+3. Run the example itself:
+
+        cfx run
+
+4. Once Firefox starts up, you should see a widget at the bottom of the
    browser labeled "Click me!" (it may be truncated due to size constraints).
    Do what it says.
 
-4. The widget label should change to "..." for a moment and then change
+5. The widget label should change to "..." for a moment and then change
    to the Twitter status of [toolness](http://twitter.com/toolness).
 
-### Overview ###
+### The Big Picture ###
 
 ![Multi-Process Architecture](http://github.com/toolness/jetpack-e10s/raw/master/diagrams/xhr.png)
 
@@ -47,7 +52,7 @@ This causes <code>[widget-e10s-adapter.js][]</code> to be found and imported as 
     } else {
 	  exports.register = function register(process) {
 		/* Set-up Firefox Process message-passing infrastructure
-		 * on the given Addon Process. */
+		 * to communicate with the given Addon Process. */
 	  };
 	}
 
@@ -67,7 +72,7 @@ If the Addon Process code attempts to import a module that does *not* explicitly
 
 If both a module in the Firefox Process *and* a module in the Addon Process request the same module that doesn't require chrome privileges, it is actually loaded *twice*: once in each process. This means that modules which intend to provide singleton-like functionality may need an e10s adapter to proxy calls into a single process.
 
-### Under The Hood ###
+### Internals ###
 
 Code for the creation and bootstrapping of the remote process is contained in <code>[e10s.js][]</code>, which uses the <code>[nsIJetpackService][]</code> and <code>[nsIJetpack][]</code> XPCOM interfaces to create a remote process and send <code>[bootstrap-remote-process.js][]</code> to it for evaluation. The `e10s` module also contains most of the `require()` logic for the Addon Process.
 
