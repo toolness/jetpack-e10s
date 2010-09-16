@@ -87,9 +87,10 @@ If both a module in the Firefox Process *and* a module in the Addon Process requ
 
 ### Internals ###
 
-Code for the creation and bootstrapping of the remote process is contained in <code>[e10s.js][]</code>, which uses the <code>[nsIJetpackService][]</code> and <code>[nsIJetpack][]</code> XPCOM interfaces to create a remote process and send <code>[bootstrap-remote-process.js][]</code> to it for evaluation. The `e10s` module also contains most of the `require()` logic for the Addon Process.
+Code for the creation and bootstrapping of the remote process is contained in <code>[e10s.js][]</code>, which uses the <code>[nsIJetpackService][]</code> and <code>[nsIJetpack][]</code> XPCOM interfaces to create a [Jetpack process][] and send <code>[bootstrap-remote-process.js][]</code> to it for evaluation. The `e10s` module also contains most of the `require()` logic for the Addon Process.
 
 [e10s.js]: http://github.com/toolness/jetpack-e10s/blob/master/packages/e10s-core/lib/e10s.js
 [bootstrap-remote-process.js]: http://github.com/toolness/jetpack-e10s/blob/master/packages/e10s-core/data/bootstrap-remote-process.js
-[nsIJetpackService]: http://mxr.mozilla.org/mozilla-central/source/js/jetpack/nsIJetpackService.idl
-[nsIJetpack]: http://mxr.mozilla.org/mozilla-central/source/js/jetpack/nsIJetpack.idl
+[nsIJetpackService]: https://developer.mozilla.org/en/nsIJetpackService
+[nsIJetpack]: https://developer.mozilla.org/en/nsIJetpack
+[Jetpack process]: https://developer.mozilla.org/en/Jetpack_Processes
