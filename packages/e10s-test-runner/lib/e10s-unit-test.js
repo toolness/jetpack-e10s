@@ -109,7 +109,7 @@ TestFinder.prototype = {
   }
 };
 
-var AssertionMixIn = exports.AssertionMixIn = function AssertionMixIn() {
+function AssertionMixIn() {
 };
 
 AssertionMixIn.prototype = {
