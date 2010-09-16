@@ -17,11 +17,28 @@ function stringifyArgs(args) {
 }
 
 var console = {
-  log: function console_log() {    
+  log: function() {    
     sendMessage('console:log', stringifyArgs(arguments));
+  },
+  info: function() {    
+    sendMessage('console:info', stringifyArgs(arguments));
+  },
+  debug: function() {    
+    sendMessage('console:debug', stringifyArgs(arguments));
+  },
+  warn: function() {    
+    sendMessage('console:warn', stringifyArgs(arguments));
+  },
+  error: function() {    
+    sendMessage('console:error', stringifyArgs(arguments));
+  },
+  exception: function() {
+    this.error("TODO: implement console.exception()");
+  },
+  trace: function() {
+    this.error("TODO: implement console.trace()");
   }
 };
-console.info = console.log;
 
 var memory = {
   track: function() {
