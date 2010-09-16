@@ -13,10 +13,11 @@ This package contains the following sub-packages:
 
 ### Prerequisites ###
 
-  * The latest [Firefox 4 Beta][].
+  * The latest [Firefox 4 Beta][], or a recent [Firefox nightly][].
   * The latest [Jetpack SDK][].
 
   [Firefox 4 Beta]: http://www.mozilla.com/en-US/firefox/beta/
+  [Firefox nightly]: http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/
   [Jetpack SDK]: http://github.com/mozillalabs/jetpack-sdk
 
 ### Running An Example ###
@@ -42,6 +43,12 @@ This package contains the following sub-packages:
 
 5. The widget label should change to "..." for a moment and then change
    to the Twitter status of [toolness](http://twitter.com/toolness).
+
+### Motivation ###
+
+Addons are awesome, but like any software, they have the ability to behave in unexpected ways. An addon that's gone rogue should have as little ability to negatively affect the rest of your browsing experience as possible; one way to achieve this is by running the addon's code in a separate process.
+
+These separate processes are relatively lightweight, don't have access to XPCOM, and can innately do little other than compute. Messaging facilities that allow them to communicate with their parent Firefox process are the only means by which they can be endowed with any real power.
 
 ### The Big Picture ###
 
