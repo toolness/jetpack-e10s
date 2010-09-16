@@ -5,42 +5,16 @@ if (this.sendMessage) {
   registerReceiver(
     "runTest",
     function(name, test) {
-      function onDone() {
-        sendMessage("testDone", test);
-      }
-      
-      var runner = {
-        waitTimeout: null,
-        extend: function extend(mixIn) {
-          for (name in mixIn) {
-            this[name] = mixIn[name];
-          }
-        },
-        pass: function pass(msg) {
-          sendMessage("testPass", test, msg);
-        },
-        fail: function fail(msg) {
-          sendMessage("testFail", test, msg);
-        },
-        waitUntilDone: function waitUntilDone(ms) {
-          if (ms === undefined)
-            ms = ut.TestRunner.prototype.DEFAULT_PAUSE_TIMEOUT;
-          var self = this;
-          this.waitTimeout = timer.setTimeout(function() {
-            self.fail("timed out");
-            self.done();
-          }, ms);
-        },
-        done: function done() {
-          timer.clearTimeout(this.waitTimeout);
-          this.waitTimeout = null;
-          onDone();
+      var runner = new ut.TestRunner();
+      runner.start({
+        test: test.testHandle,
+        onDone: function() {
+          test.passed = runner.test.passed;
+          test.failed = runner.test.failed;
+          test.errors = runner.test.errors;
+          sendMessage("testDone", test);
         }
-      };
-      runner.extend(new ut.AssertionMixIn());
-      test.testHandle.testFunction(runner);
-      if (runner.waitTimeout == null)
-        onDone();
+      });
     });
     
   exports.main = function(options, callbacks) {
@@ -58,7 +32,8 @@ if (this.sendMessage) {
       for (testName in module) {
         var handle = createHandle();
         handle.testFunction = makeTest(suite, testName, module[testName]);
-        tests.push({testHandle: handle, name: suite + "." + testName});
+        handle.name = suite + "." + testName;
+        tests.push({testHandle: handle, name: handle.name});
       }
     });
     sendMessage("testsFound", tests, options.finderHandle);
@@ -66,7 +41,13 @@ if (this.sendMessage) {
 } else {
   exports.register = function(process) {
     process.registerReceiver("testDone", function(name, remoteTest) {
-      remoteTest.testHandle.runner.done();
+      var runner = remoteTest.testHandle.runner;
+      runner.passed += remoteTest.passed;
+      runner.failed += remoteTest.failed;
+      runner.test.passed = remoteTest.passed;
+      runner.test.failed = remoteTest.failed;
+      runner.test.errors = remoteTest.errors;
+      runner.done();
     });
     process.registerReceiver("testPass", function(name, remoteTest, msg) {
       remoteTest.testHandle.runner.pass(msg);

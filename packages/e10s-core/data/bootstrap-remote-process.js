@@ -3,12 +3,31 @@
 
 var global = this;
 
+function stringify(arg) {
+  try {
+    return String(arg);
+  }
+  catch(ex) {
+    return "<toString() error>";
+  }
+}
+
+function stringifyArgs(args) {
+  return Array.map(args, stringify).join(" ");
+}
+
 var console = {
-  log: function console_log(msg) {
-    sendMessage('console:log', "" + msg);
+  log: function console_log() {    
+    sendMessage('console:log', stringifyArgs(arguments));
   }
 };
 console.info = console.log;
+
+var memory = {
+  track: function() {
+    /* TODO */
+  }
+};
 
 var modules = {};
 
@@ -41,6 +60,7 @@ function require(name) {
   // Set up the globals of the sandbox.
   module.exports = {};
   module.console = console;
+  module.memory = memory;
   module.require = require;
 
   if (response.needsMessaging)
