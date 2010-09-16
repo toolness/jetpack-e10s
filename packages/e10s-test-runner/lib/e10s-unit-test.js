@@ -35,7 +35,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 var timer = require("timer");
-var file = require("file");
 
 exports.findAndRunTests = function findAndRunTests(options) {
   var finder = new TestFinder(options.dirs, options.filter);
@@ -68,6 +67,7 @@ TestFinder.prototype = {
     var tests = [];
     var filterRegex = this.filter ? new RegExp(this.filter) : null;
     var remoteSuites = [];
+    var file = require("file");
 
     this.dirs.forEach(
       function(dir) {
@@ -109,14 +109,99 @@ TestFinder.prototype = {
   }
 };
 
+var AssertionMixIn = exports.AssertionMixIn = function AssertionMixIn() {
+};
+
+AssertionMixIn.prototype = {
+  assert: function assert(a, message) {
+    if (!a) {
+      if (!message)
+        message = "assertion failed, value is " + a;
+      this.fail(message);
+    } else
+      this.pass(message || "assertion successful");
+  },
+  
+  assertMatches: function assertMatches(string, regexp, message) {
+    if (regexp.test(string)) {
+      if (!message)
+        message = uneval(string) + " matches " + uneval(regexp);
+      this.pass(message);
+    } else {
+      var no = uneval(string) + " doesn't match " + uneval(regexp);
+      if (!message)
+        message = no;
+      else
+        message = message + " (" + no + ")";
+      this.fail(message);
+    }
+  },
+
+  assertRaises: function assertRaises(func, predicate, message) {
+    try {
+      func();
+      if (message)
+        this.fail(message + " (no exception thrown)");
+      else
+        this.fail("function failed to throw exception");
+    } catch (e) {
+      var errorMessage;
+      if (typeof(e) == "string")
+        errorMessage = e;
+      else
+        errorMessage = e.message;
+      if (typeof(predicate) == "object")
+        this.assertMatches(errorMessage, predicate, message);
+      else
+        this.assertEqual(errorMessage, predicate, message);
+    }
+  },
+
+  assertNotEqual: function assertNotEqual(a, b, message) {
+    if (a != b) {
+      if (!message)
+        message = "a != b != " + uneval(a);
+      this.pass(message);
+    } else {
+      var equality = uneval(a) + " == " + uneval(b);
+      if (!message)
+        message = equality;
+      else
+        message += " (" + equality + ")";
+      this.fail(message);
+    }
+  },
+
+  assertEqual: function assertEqual(a, b, message) {
+    if (a == b) {
+      if (!message)
+        message = "a == b == " + uneval(a);
+      this.pass(message);
+    } else {
+      var inequality = uneval(a) + " != " + uneval(b);
+      if (!message)
+        message = inequality;
+      else
+        message += " (" + inequality + ")";
+      this.fail(message);
+    }
+  }
+};
+
 var TestRunner = exports.TestRunner = function TestRunner(options) {
   memory.track(this);
   this.passed = 0;
   this.failed = 0;
   this.testRunSummary = [];
+  this.extend(new AssertionMixIn());
 };
 
 TestRunner.prototype = {
+  extend: function extend(mixIn) {
+    for (name in mixIn)
+      this[name] = mixIn[name];
+  },
+
   toString: function toString() "[object TestRunner]",
 
   DEFAULT_PAUSE_TIMEOUT: 10000,
@@ -170,80 +255,6 @@ TestRunner.prototype = {
     console.exception(e);
     this.failed++;
     this.test.failed++;
-  },
-
-  assertMatches: function assertMatches(string, regexp, message) {
-    if (regexp.test(string)) {
-      if (!message)
-        message = uneval(string) + " matches " + uneval(regexp);
-      this.pass(message);
-    } else {
-      var no = uneval(string) + " doesn't match " + uneval(regexp);
-      if (!message)
-        message = no;
-      else
-        message = message + " (" + no + ")";
-      this.fail(message);
-    }
-  },
-
-  assertRaises: function assertRaises(func, predicate, message) {
-    try {
-      func();
-      if (message)
-        this.fail(message + " (no exception thrown)");
-      else
-        this.fail("function failed to throw exception");
-    } catch (e) {
-      var errorMessage;
-      if (typeof(e) == "string")
-        errorMessage = e;
-      else
-        errorMessage = e.message;
-      if (typeof(predicate) == "object")
-        this.assertMatches(errorMessage, predicate, message);
-      else
-        this.assertEqual(errorMessage, predicate, message);
-    }
-  },
-
-  assert: function assert(a, message) {
-    if (!a) {
-      if (!message)
-        message = "assertion failed, value is " + a;
-      this.fail(message);
-    } else
-      this.pass(message || "assertion successful");
-  },
-
-  assertNotEqual: function assertNotEqual(a, b, message) {
-    if (a != b) {
-      if (!message)
-        message = "a != b != " + uneval(a);
-      this.pass(message);
-    } else {
-      var equality = uneval(a) + " == " + uneval(b);
-      if (!message)
-        message = equality;
-      else
-        message += " (" + equality + ")";
-      this.fail(message);
-    }
-  },
-
-  assertEqual: function assertEqual(a, b, message) {
-    if (a == b) {
-      if (!message)
-        message = "a == b == " + uneval(a);
-      this.pass(message);
-    } else {
-      var inequality = uneval(a) + " != " + uneval(b);
-      if (!message)
-        message = inequality;
-      else
-        message += " (" + inequality + ")";
-      this.fail(message);
-    }
   },
 
   done: function done() {

@@ -2,7 +2,13 @@ if (this.sendMessage) {
   registerReceiver(
     "runTest",
     function(name, test) {
+      var ut = require("e10s-unit-test");
       var runner = {
+        extend: function extend(mixIn) {
+          for (name in mixIn) {
+            this[name] = mixIn[name];
+          }
+        },
         pass: function pass(msg) {
           sendMessage("testPass", test, msg);
         },
@@ -10,6 +16,7 @@ if (this.sendMessage) {
           sendMessage("testFail", test, msg);
         }
       };
+      runner.extend(new ut.AssertionMixIn());
       test.testHandle.testFunction(runner);
       sendMessage("testDone", test);
     });
