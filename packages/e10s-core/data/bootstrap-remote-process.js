@@ -10,7 +10,13 @@ var console = {
 };
 console.info = console.log;
 
+var modules = {};
+
 function require(name) {
+  // TODO: Support relative imports.
+  if (name && name[0] != "." && name in modules)
+    return modules[name].exports;
+
   var response = callMessage("require", name)[0];
   switch (response.code) {
   case "not-found":
@@ -29,6 +35,8 @@ function require(name) {
   };
 
   var module = createSandbox();
+
+  modules[name] = module;
 
   // Set up the globals of the sandbox.
   module.exports = {};

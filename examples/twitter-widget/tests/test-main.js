@@ -8,3 +8,11 @@ exports.testTestMethods = function testTestMethods(test) {
   test.assertMatches("one", /o/, "test.assertMatches works");
   test.pass("test.pass() works");
 };
+
+exports.testAsync = function testAsync(test) {
+  require("timer").setTimeout(function() {
+    test.pass("asynchronous tests work");
+    test.done();
+  }, 10);
+  test.waitUntilDone();
+};

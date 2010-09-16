@@ -1,9 +1,16 @@
 if (this.sendMessage) {
+  var timer = require("timer");
+  var ut = require("e10s-unit-test");
+
   registerReceiver(
     "runTest",
     function(name, test) {
-      var ut = require("e10s-unit-test");
+      function onDone() {
+        sendMessage("testDone", test);
+      }
+      
       var runner = {
+        waitTimeout: null,
         extend: function extend(mixIn) {
           for (name in mixIn) {
             this[name] = mixIn[name];
@@ -14,11 +21,26 @@ if (this.sendMessage) {
         },
         fail: function fail(msg) {
           sendMessage("testFail", test, msg);
+        },
+        waitUntilDone: function waitUntilDone(ms) {
+          if (ms === undefined)
+            ms = ut.TestRunner.prototype.DEFAULT_PAUSE_TIMEOUT;
+          var self = this;
+          this.waitTimeout = timer.setTimeout(function() {
+            self.fail("timed out");
+            self.done();
+          }, ms);
+        },
+        done: function done() {
+          timer.clearTimeout(this.waitTimeout);
+          this.waitTimeout = null;
+          onDone();
         }
       };
       runner.extend(new ut.AssertionMixIn());
       test.testHandle.testFunction(runner);
-      sendMessage("testDone", test);
+      if (runner.waitTimeout == null)
+        onDone();
     });
     
   exports.main = function(options, callbacks) {
