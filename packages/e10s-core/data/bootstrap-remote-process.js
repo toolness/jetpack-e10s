@@ -32,8 +32,8 @@ var console = {
   error: function() {    
     sendMessage('console:error', stringifyArgs(arguments));
   },
-  exception: function() {
-    this.error("TODO: implement console.exception()");
+  exception: function(e) {
+    sendMessage('console:exception', e);
   },
   trace: function() {
     this.error("TODO: implement console.trace()");

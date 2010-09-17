@@ -76,17 +76,24 @@ exports.createProcess = function createProcess() {
     console.error(msg);
   });
 
+  function remoteException(exception) {
+    return {
+      toString: function toString() {
+        return "Error: " + this.message;
+      },
+      __proto__: exception
+    };
+  }
+  
+  process.registerReceiver("console:exception", function(name, exception) {
+    console.exception(remoteException(exception));
+  });
+  
   process.registerReceiver(
     "core:exception",
     function(name, exception) {
-      var e = {
-        toString: function toString() {
-          return "Error: " + e.message;
-        },
-        __proto__: exception
-      };
       console.log("An exception occurred in the child Jetpack process.");
-      console.exception(e);
+      console.exception(remoteException(exception));
     });
 
   process.registerReceiver(
