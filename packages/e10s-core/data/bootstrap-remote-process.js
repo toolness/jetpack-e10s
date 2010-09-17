@@ -13,11 +13,6 @@ function stringify(arg) {
   }
 }
 
-// Taken from plain-text-console.js.
-function stringifyArgs(args) {
-  return Array.map(args, stringify).join(" ");
-}
-
 var console = {
   exception: function(e) {
     sendMessage('console:exception', e);
@@ -29,7 +24,7 @@ var console = {
 
 ['log', 'debug', 'info', 'warn', 'error'].forEach(function(method) {
   console[method] = function() {
-    sendMessage('console:' + method, stringifyArgs(arguments));
+    sendMessage('console:' + method, Array.map(arguments, stringify));
   }
 });
 

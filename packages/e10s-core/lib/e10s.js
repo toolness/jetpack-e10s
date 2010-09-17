@@ -57,8 +57,8 @@ exports.createProcess = function createProcess() {
   // communicate with us.
 
   ['log', 'debug', 'info', 'warn', 'error'].forEach(function(method) {
-    process.registerReceiver("console:" + method, function(name, msg) {
-      console[method](msg);
+    process.registerReceiver("console:" + method, function(name, args) {
+      console[method].apply(console, args);
     });
   });
 
