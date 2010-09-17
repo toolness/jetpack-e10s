@@ -56,24 +56,10 @@ exports.createProcess = function createProcess() {
   // Set up message receivers that the remote process will use to
   // communicate with us.
 
-  process.registerReceiver("console:log", function(name, msg) {
-    console.log(msg);
-  });
-
-  process.registerReceiver("console:debug", function(name, msg) {
-    console.debug(msg);
-  });
-
-  process.registerReceiver("console:info", function(name, msg) {
-    console.info(msg);
-  });
-
-  process.registerReceiver("console:warn", function(name, msg) {
-    console.warn(msg);
-  });
-
-  process.registerReceiver("console:error", function(name, msg) {
-    console.error(msg);
+  ['log', 'debug', 'info', 'warn', 'error'].forEach(function(method) {
+    process.registerReceiver("console:" + method, function(name, msg) {
+      console[method](msg);
+    });
   });
 
   function remoteException(exception) {

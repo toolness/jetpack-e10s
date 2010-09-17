@@ -3,6 +3,7 @@
 
 var global = this;
 
+// Taken from plain-text-console.js.
 function stringify(arg) {
   try {
     return String(arg);
@@ -12,26 +13,12 @@ function stringify(arg) {
   }
 }
 
+// Taken from plain-text-console.js.
 function stringifyArgs(args) {
   return Array.map(args, stringify).join(" ");
 }
 
 var console = {
-  log: function() {    
-    sendMessage('console:log', stringifyArgs(arguments));
-  },
-  info: function() {    
-    sendMessage('console:info', stringifyArgs(arguments));
-  },
-  debug: function() {    
-    sendMessage('console:debug', stringifyArgs(arguments));
-  },
-  warn: function() {    
-    sendMessage('console:warn', stringifyArgs(arguments));
-  },
-  error: function() {    
-    sendMessage('console:error', stringifyArgs(arguments));
-  },
   exception: function(e) {
     sendMessage('console:exception', e);
   },
@@ -39,6 +26,12 @@ var console = {
     sendMessage('console:trace', new Error());
   }
 };
+
+['log', 'debug', 'info', 'warn', 'error'].forEach(function(method) {
+  console[method] = function() {
+    sendMessage('console:' + method, stringifyArgs(arguments));
+  }
+});
 
 var memory = {
   track: function() {
