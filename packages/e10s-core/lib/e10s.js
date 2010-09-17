@@ -85,6 +85,12 @@ exports.createProcess = function createProcess() {
     };
   }
   
+  process.registerReceiver("console:trace", function(name, exception) {
+    var traceback = require("traceback");
+    var stack = traceback.fromException(remoteException(exception));
+    console.log(traceback.format(stack.slice(0, -2)));
+  });
+
   process.registerReceiver("console:exception", function(name, exception) {
     console.exception(remoteException(exception));
   });

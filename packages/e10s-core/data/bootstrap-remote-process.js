@@ -36,7 +36,7 @@ var console = {
     sendMessage('console:exception', e);
   },
   trace: function() {
-    this.error("TODO: implement console.trace()");
+    sendMessage('console:trace', new Error());
   }
 };
 
