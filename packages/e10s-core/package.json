@@ -1,4 +1,5 @@
 {
   "loader": "lib/cuddlefish.js",
+  "keywords": ["jetpack-low-level"],
   "dependencies": ["jetpack-core"]
 }

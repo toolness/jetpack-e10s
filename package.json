@@ -1,1 +1,3 @@
-{}
+{
+  "description": "Allows addons to execute in a separate process."
+}
