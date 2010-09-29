@@ -15,7 +15,7 @@ if (this.sendMessage) {
       this.handle = createHandle();
       this.handle.xhr = this;
 
-      if (this.async)
+      if (this.async === true || this.async === undefined)
         sendMessage("xhr:async-send", this.handle, this.method, this.uri, data);
       else {
         callMessage("xhr:sync-send", this.handle, this.method, this.uri, data);
@@ -49,17 +49,14 @@ if (this.sendMessage) {
       "xhr:sync-send",
       function(name, handle, method, uri, data) {
         var xhr = require("xhr");
-        console.log("asymmetric-sync req received");
         var req = new xhr.XMLHttpRequest();
         req.open(method, uri, true);
         req.onreadystatechange = function() {
-          console.log("asymmetric-sync req.onreadystatechange");
           if (req.readyState == 4)
             handle.finishedReq = req;
         };
         handle.req = req;
         req.send(data);
-        console.log("asymmetric-sync req sent");
       });
 
     process.registerReceiver(
@@ -76,17 +73,14 @@ if (this.sendMessage) {
       "xhr:async-send",
       function(name, handle, method, uri, data) {
         var xhr = require("xhr");
-        console.log("req received");
         var req = new xhr.XMLHttpRequest();
         req.open(method, uri, true);
         req.onreadystatechange = function() {
-          console.log("req.onreadystatechange");
           var status = (req.readyState == 4) ? req.status : undefined;
           process.sendMessage("xhr:onreadystatechange", handle,
                               req.readyState, status, req.responseText);
         };
         req.send(data);
-        console.log("req sent");
       });
   };
 }
