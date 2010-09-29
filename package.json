@@ -1,3 +1,7 @@
 {
-  "description": "Allows addons to execute in a separate process."
+  "name": "jetpack-e10s",
+  "version": "0.1",
+  "author": "Atul Varma (http://toolness.com/)",
+  "description": "Allows addons to execute in a separate process.",
+  "license": "MPL 1.1/GPL 2.0/LGPL 2.1"
 }
