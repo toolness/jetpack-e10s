@@ -127,6 +127,14 @@ exports.createProcess = function createProcess() {
         if (moduleInfo.needsChrome) {
           return maybeImportAdapterModule() || {code: "access-denied"};
         } else {
+
+          // Even if a module doesn't explicitly require chrome privileges, if
+          // an e10s adapter exists for it, use it, because said module might
+          // import other modules that require chrome.
+          //
+          // In the future we may want to look at the module's dependencies to
+          // determine whether importing an adapter is a better idea.
+
           return maybeImportAdapterModule() || {
             code: "ok",
             needsMessaging: false,
