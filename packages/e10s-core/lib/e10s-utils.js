@@ -28,15 +28,14 @@ function unpickleArgs(types, args) {
   return unpickled;
 }
 
-function createProxyPrototype(options) {
-  var chrome = options.chrome;
+function createProxyPrototype(chrome, meta) {
   var prototype = {};
 
   function defineProperty(name, info) {
     switch (info.type) {
     case "async-method":
       prototype[name] = function() {
-        chrome.sendMessage(options.meta.channel, {
+        chrome.sendMessage(meta.channel, {
           name: name,
           handle: this._handle,
           args: pickleArgs(info.args, arguments)
@@ -48,29 +47,28 @@ function createProxyPrototype(options) {
     }    
   }
 
-  for (name in options.meta.properties)
-    defineProperty(name, options.meta.properties[name]);
+  for (name in meta.properties)
+    defineProperty(name, meta.properties[name]);
     
   return prototype;
 };
 
-exports.createProxy = function createProxy(options) {
+exports.createProxy = function createProxy(chrome, meta) {
   function proxyConstructor() {
-    this._handle = options.chrome.callMessage(options.meta.channel, {
+    this._handle = chrome.callMessage(meta.channel, {
       msg: "construct",
-      args: pickleArgs(options.meta.constructor.args, arguments)
+      args: pickleArgs(meta.constructor.args, arguments)
     })[0];
   };
 
-  proxyConstructor.prototype = createProxyPrototype(options);
+  proxyConstructor.prototype = createProxyPrototype(chrome, meta);
 
   return proxyConstructor;
 };
 
-exports.registerProxyEndpoint = function registerProxyEndpoint(options) {
-  var process = options.process;
-  var constructor = options.meta.constructor;
-  var properties = options.meta.properties;
+exports.registerProxyEndpoint = function registerProxyEndpoint(process, meta) {
+  var constructor = meta.constructor;
+  var properties = meta.properties;
 
   function propertyAccess(options) {
     if (!(options.name in properties))
@@ -87,7 +85,7 @@ exports.registerProxyEndpoint = function registerProxyEndpoint(options) {
     }
   }
 
-  process.registerReceiver(options.meta.channel, function(name, options) {
+  process.registerReceiver(meta.channel, function(name, options) {
     switch (options.msg) {
     case "property":
       return propertyAccess(options);

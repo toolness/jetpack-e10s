@@ -18,15 +18,9 @@ var XHR_META = {
 };
 
 if (this.sendMessage) {
-  exports.XMLHttpRequest = e10sUtils.createProxy({
-    chrome: this,
-    meta: XHR_META
-  });
+  exports.XMLHttpRequest = e10sUtils.createProxy(this, XHR_META);
 } else {
   exports.register = function(process) {
-    e10sUtils.registerProxyEndpoint({
-      process: process,
-      meta: XHR_META
-    });
+    e10sUtils.registerProxyEndpoint(process, XHR_META);
   };
 }
