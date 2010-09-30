@@ -127,7 +127,7 @@ exports.createProcess = function createProcess() {
         if (moduleInfo.needsChrome) {
           return maybeImportAdapterModule() || {code: "access-denied"};
         } else {
-          return {
+          return maybeImportAdapterModule() || {
             code: "ok",
             needsMessaging: false,
             script: makeScriptFrom(moduleURL)
