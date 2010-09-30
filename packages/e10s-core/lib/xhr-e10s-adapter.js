@@ -2,12 +2,9 @@ var e10sUtils = require("e10s-utils");
 
 var XHR_META = {
   channel: "xhr",
-  constructor: {
-    factory: function() {
-      var xhr = require("xhr");
-      return new xhr.XMLHttpRequest();
-    },
-    args: []
+  constructor: function() {
+    var xhr = require("xhr");
+    return new xhr.XMLHttpRequest();
   },
   properties: {
     overrideMimeType: {

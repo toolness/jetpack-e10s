@@ -28,6 +28,14 @@ function unpickleArgs(types, args) {
   return unpickled;
 }
 
+function normalizeMeta(meta) {
+  if (typeof(meta.constructor) == "function")
+    meta.constructor = {
+      factory: meta.constructor,
+      args: []
+    };
+}
+
 function createProxyPrototype(chrome, meta) {
   var prototype = {};
 
@@ -54,6 +62,8 @@ function createProxyPrototype(chrome, meta) {
 };
 
 exports.createProxy = function createProxy(chrome, meta) {
+  normalizeMeta(meta);
+
   function proxyConstructor() {
     this._handle = chrome.callMessage(meta.channel, {
       msg: "construct",
@@ -67,6 +77,8 @@ exports.createProxy = function createProxy(chrome, meta) {
 };
 
 exports.registerProxyEndpoint = function registerProxyEndpoint(process, meta) {
+  normalizeMeta(meta);
+
   var constructor = meta.constructor;
   var properties = meta.properties;
 
