@@ -67,6 +67,7 @@ function require(name) {
   module.console = console;
   module.memory = memory;
   module.require = require;
+  module.__url__ = response.script.filename;
 
   if (response.needsMessaging)
     ["registerReceiver",
