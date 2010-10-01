@@ -1,3 +1,6 @@
+// This is just a temporary test suite; we should ultimately just use
+// the self module's original test suite.
+
 exports.testSelf = function(test) {
   var self = require("self");
   test.assertEqual(typeof(self.id), "string", "self.id is a string");
