@@ -81,16 +81,14 @@ TestFinder.prototype = {
             var loader = require("parent-loader");
             var url = loader.fs.resolveModule(null, suite);
             var moduleInfo = packaging.getModuleInfo(url);
-            if (moduleInfo.needsChrome) {
-              var module = require(suite);
-              for (name in module)
-                tests.push({
-                  testFunction: self._makeTest(suite, name, module[name]),
-                  name: suite + "." + name
-                });
-            } else {
+            var module = require(suite);
+            for (name in module)
+              tests.push({
+                testFunction: self._makeTest(suite, name, module[name]),
+                name: suite + "." + name
+              });
+            if (!moduleInfo.needsChrome)
               remoteSuites.push(suite);
-            }
           });
       });
 
