@@ -1,3 +1,6 @@
+// This is a very incomplete adapter and doesn't port all of the original
+// module's functionality.
+
 if (this.sendMessage) {
   exports.Widget = function Widget(options) {
     this.options_ = options;

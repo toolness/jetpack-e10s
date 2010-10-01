@@ -1,3 +1,7 @@
+// This is the first code that's ever run in a Jetpack process. It sets up
+// infrastructure and receivers needed to start a Jetpack-based addon
+// in a separate process.
+
 // Set up our "proxy" objects that just send messages to our parent
 // process to do the real work.
 

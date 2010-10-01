@@ -1,3 +1,6 @@
+// This is a modification of jetpack-core's cuddlefish.js. We'll 
+// ultimately need to fold these changes into that original file.
+
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *

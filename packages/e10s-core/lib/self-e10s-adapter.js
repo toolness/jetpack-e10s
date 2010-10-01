@@ -1,3 +1,7 @@
+// While this adapter is complete, it most likely isn't very secure,
+// in that it allows the remote addon process to ask for any content
+// on the host filesystem.
+
 if (this.sendMessage) {
   exports.id = callMessage("self:id")[0];
   exports.data = {

@@ -6,7 +6,7 @@ This package contains the following sub-packages:
 
   * <code>[e10s-core][]</code> makes the Jetpack platform multi-process-aware. Specifically, it replaces parts of Jetpack's module loader to allow non-chrome-privileged modules to be loaded in a separate process. Citing this package as a dependency in an addon's `package.json` will cause it to be loaded and executed with the semantics described in the rest of this document.
 
-  * <code>[e10s-test-runner][]</code> provides a multi-process-aware test runner that executes all non-chrome-privileged test modules in a separate process.
+  * <code>[e10s-test-runner][]</code> provides a multi-process-aware test runner that executes all non-chrome-privileged test modules in both a separate process and the chrome process.
 
   [e10s-core]: http://github.com/toolness/jetpack-e10s/tree/master/packages/e10s-core/
   [e10s-test-runner]: http://github.com/toolness/jetpack-e10s/tree/master/packages/e10s-test-runner/
