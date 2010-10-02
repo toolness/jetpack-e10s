@@ -10,21 +10,22 @@ exports.main = function() {
     onClick: function() {
       var self = this;
       self.content = "...";
-      var xhr = require("xhr");
       console.log("Widget clicked");
-      var req = new xhr.XMLHttpRequest();
-      var url = ("http://api.twitter.com/1/users/show.json?" +
-                 "screen_name=toolness");
-      req.open("GET", url, false);
-      req.send(null);
-      if (req.status == 200) {
-        console.log("Data received: " + req.responseText.length +
-                    " bytes");
-        self.content = JSON.parse(req.responseText).status.text;
-      } else {
-        console.log("Fetch error: " + req.status);
-        self.content = "ERROR";        
-      }
+      var req = require("request").Request({
+        url: "http://api.twitter.com/1/users/show.json?screen_name=toolness",
+        onComplete: function() {
+          var response = this.response;
+          if (response.status == 200) {
+            console.log("Data received: " +
+                        response.text.length +
+                        " bytes");
+            self.content = response.json.status.text;
+          } else {
+            console.log("Fetch error: " + response.status);
+            self.content = "ERROR";
+          }
+        }
+      }).get();
     }
   };
   widget.add(new widget.Widget(options));

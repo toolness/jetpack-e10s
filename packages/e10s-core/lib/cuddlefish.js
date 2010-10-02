@@ -93,6 +93,7 @@
              main: function main(options, callbacks) {
                var e10s = loader.require("e10s");  
                var process = e10s.createProcess();
+               loader.console.log("starting main in remote process.");
                process.sendMessage("startMain", options.main);
              }
            };
