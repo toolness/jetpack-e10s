@@ -39,7 +39,10 @@ if (this.sendMessage) {
         // Tried E4X'ing here, but it didn't work; XML objects don't seem
         // to provide a DOM API.
         // https://developer.mozilla.org/en/E4X
-        
+
+        // Other (horrible) approaches include bundling a JS XML parser
+        // and proxying the XML object in the chrome process.
+
         // Fix for bug 336551
         //var XMLDeclRE = /^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/;
         //return new XML(response.responseText.replace(XMLDeclRE, ""));
