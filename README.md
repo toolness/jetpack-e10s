@@ -52,7 +52,7 @@ These separate processes are relatively lightweight, don't have access to XPCOM,
 
 ### The Big Picture ###
 
-![Multi-Process Architecture](http://github.com/toolness/jetpack-e10s/raw/master/diagrams/twitter-widget.png)
+![Multi-Process Architecture](https://github.com/toolness/jetpack-e10s/raw/master/diagrams/twitter-widget.png)
 
 The above diagram is a simplified depiction of what happens when the example [twitter-widget][] addon is loaded.
 
